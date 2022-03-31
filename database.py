@@ -4,21 +4,28 @@ import sqlite3
 
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
     title TEXT,
-    release_timestamp REAL,
-    watched INTEGER
+    release_timestamp REAL
 );"""
 
-INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp, watched) VALUES (?, ?, 0);"
+CREATE_WATCHLIST_TABLE = """CREATE TABLE IF NOT EXISTS watched (
+    watcher_name TEXT,
+    title TEXT
+);"""
+
+INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp) VALUES (?, ?);"
+DELETE_MOVIE = "DELETE FROM movies WHERE title = ?;" 
 SELECT_ALL_MOVIES = "SELECT * FROM movies;"
 SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > ?;"
-SELECT_WATCHED_MOVIES = "SELECT * FROM movies WHERE watched = 1;"
+INSERT_WATCHED_MOVIE = "INSERT INTO watched (watcher_name, title) VALUES (?, ?);"
+SELECT_WATCHED_MOVIES = "SELECT * FROM watched WHERE watcher_name = ?;"
 
 connection = sqlite3.connect("data.db")
 
 
-def create_tables():
+def create_tables(username, movie_title):
     with connection:
         connection.execute(CREATE_MOVIES_TABLE)
+        connection.execute(INSERT_WATCHED_MOVIE, (username, movie_title))
 
 
 def add_movie(title, release_timestamp):
@@ -37,8 +44,14 @@ def get_movies(upcoming=False):
         return cursor.fetchall()
 
 
-def get_watched_movies():
+def watch_movie(username, movie_title):
+    with connection:
+        connection.execute(DELETE_MOVIE, (movie_title,))
+        connection.execute(INSERT_WATCHED_MOVIE, (username, movie_title))
+
+
+def get_watched_movies(username):
     with connection:
         cursor = connection.cursor()
-        cursor.execute(SELECT_WATCHED_MOVIES)
+        cursor.execute(SELECT_WATCHED_MOVIES, (username,))
         return cursor.fetchall()
