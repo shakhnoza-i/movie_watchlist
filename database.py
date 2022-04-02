@@ -31,6 +31,8 @@ WHERE users.username = ?;"""
 INSERT_WATCHED_MOVIE = "INSERT INTO watched (user_username, movie_id) VALUES (?, ?);"
 SET_MOVIE_WATCHED = "SELECT * FROM watched WHERE watcher_name = ?;"
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;""" # %?% here give an error
+CREATE_RELEASE_INDEX = "CREATE INDEX IF NOT EXISTS idx_movies_release ON movies(release_timestamp);"
+
 
 connection = sqlite3.connect("data.db")
 
@@ -40,6 +42,7 @@ def create_tables():
         connection.execute(CREATE_MOVIES_TABLE)
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
+        connection.execute(CREATE_RELEASE_INDEX)
 
 
 def add_movie(title, release_timestamp):
